@@ -1,37 +1,77 @@
-import { USERS_URL } from "../constant";
-import { apiSlice } from "./apiSlice";
-
-export const usersApiSlice = apiSlice.injectEndpoints({ // isse main apislice ka endpoint hit karke fill kar sakta hu
-    endpoints:(builders) => ({
-        login: builders.mutation({  // build query is used to build the query without any fetch request to axios
-            query: (data) => ({
-                url: `${USERS_URL}/auth`,
+import { USERS_URL } from "../constants";
+import { apiSlice } from "./apiSlice"; // Importing the API slice setup
+export const usersApiSlice = apiSlice.injectEndpoints({
+    // Define endpoints for the API slice
+    endpoints: (builder) => ({
+       login: builder.mutation({
+    // mutation because we are making post requst
+            query:(data)=>({   //we are sendng data to our endpoints
+                url:`${USERS_URL}/auth`,
                 method:'POST',
-                body:data,
+                body:data,  
+            }),
+        }), 
+        register:builder.mutation({
+          query: (data) => ({
+            url: `${USERS_URL}`,
+            method:'POST',
+            body:data,
+          }),
+        }),
+        logout: builder.mutation({
+            query:()=> ({
+                url:`${USERS_URL}/logout`,
+                method:'POST',
             }),
         }),
-        register:builders.mutation({
-            query: (data) => ({
-                url: `${USERS_URL}/register`,
-                method:'POST',
-                body:data,
+        profile: builder.mutation({
+            query:(data) => ({
+                url: `${USERS_URL}/profile`, 
+                method: 'PUT',
+                body: data,
             }),
         }),
-        logout:builders.mutation({
+        getUsers: builder.query({
             query: () => ({
-                url: `${USERS_URL}/logout`,
-                method:'POST',
-            })
+                url: USERS_URL
+            }),
+            providesTags: ['Users'],  //if we dont do this then we will have to reload page every time 
+            keepUnusedDataFor: 5 * 60
         }),
-        profile: builders.mutation({
+        deleteUser: builder.mutation({
+            query: (userId) => ({
+               url: `${USERS_URL}/${userId}`,
+               method: 'DELETE' 
+            }),
+        }),
+        getUserDetails: builder.query({
+            query: (userId) => ({
+                url: `${USERS_URL}/${userId}`,
+            }),
+            keepUnusedDataFor: 5,
+        }),
+        updateUser: builder.mutation({
             query: (data) => ({
-                url: `${USERS_URL}/profile`,
-                method:`PUT`,
-                body:data,
-            })
-        })
-       
+                url: `${USERS_URL}/${data.userId}`,
+                method: 'PUT',
+                body: data,
+            }),
+            invalidatesTags: ['Users'],
+        }),
     }),
 });
+export const {useLoginMutation,
+     useLogoutMutation,
+      useRegisterMutation,
+    useProfileMutation,
+    useGetUsersQuery,
+    useDeleteUserMutation,
+    useGetUserDetailsQuery,
+    useUpdateUserMutation,
+} = usersApiSlice;
 
-export  const {useLoginMutation,useLogoutMutation,useRegisterMutation,useProfileMutation} = usersApiSlice; // we have to prefix with use and suffix with query
+
+
+
+
+

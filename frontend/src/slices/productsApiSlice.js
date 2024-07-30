@@ -1,23 +1,82 @@
-import { product_URL } from "../constant";
-import { apiSlice } from "./apiSlice";
+import { PRODUCTS_URL} from "../constants";
+import { apiSlice } from "./apiSlice"; // Importing the API slice setup
 
-export const productApiSlice = apiSlice.injectEndpoints({ // isse main apislice ka endpoint hit karke fill kar sakta hu
-    endpoints:(builders) => ({
-        getProducts: builders.query({  // build query is used to build the query without any fetch request to axios
-            query: () => ({
-                url: product_URL,
-
-
+// Define the product API slice
+export const productApiSlice = apiSlice.injectEndpoints({
+    // Define endpoints for the API slice
+    endpoints: (builder) => ({
+    // Define a 'getProducts' query endpoint
+        getProducts: builder.query({
+    // Define the query configuration
+            query:({keyword, pageNumber})=>({
+                url:PRODUCTS_URL,  // Specify the URL to fetch products from
+                params: {
+                    keyword,
+                    pageNumber,
+                },
             }),
-            keepUnusedDataFor:5 // how much time we want this data to last
+            providesTags: ['Products'], //otherwise you may have to refresh the page to see result
+            keepUnusedDataFor:5   // Specify the duration to keep unused data in cache (5 seconds)
         }),
-        getProductsDetails:builders.query({
-            query: (productId) => ({
-                url: `${product_URL}/${productId}`,
+        getProductDetails: builder.query({
+            query:(productId) => ({
+                url: `${PRODUCTS_URL}/${productId}`,
             }),
-            keepUnusedDataFor:5 
-        })
-    }),
+            keepUnusedDataFor:5,
+        }),
+        createProduct: builder.mutation({
+            query: ()=> ({
+                url:PRODUCTS_URL,
+                method: 'POST',
+            }),
+            invalidatedTags: ['Product'], //it will stop it being cached so that we will have fresh data.
+        }),
+        updateProduct: builder.mutation({
+            query: (data) => ({
+              url: `${PRODUCTS_URL}/${data.productId}`,
+              method: 'PUT',
+              body: data,
+            }),
+            invalidatesTags: ['Products'],
+          }),
+          uploadProductImage: builder.mutation({
+            query: (data) => ({
+              url: `/api/upload`,
+              method: 'POST',
+              body: data,
+            }),
+         
+          }),
+
+        deleteProduct: builder.mutation({
+            query:(productId) => ({
+                url:`${PRODUCTS_URL}/${productId}`,
+                method: 'DELETE',
+            }),
+        }) ,
+        createReview: builder.mutation({
+            query:(data) => ({
+                url:`${PRODUCTS_URL}/${data.productId}/reviews`,
+                method: 'POST',
+                body: data,
+            }),
+            invalidatesTags: ['Product'],
+        }),
+        getTopProducts: builder.query({
+            query: () => `${PRODUCTS_URL}/top`,
+            keepUnusedDataFor: 5,
+          }),
+        }),
 });
 
-export  const {useGetProductsQuery,useGetProductsDetailsQuery} = productApiSlice; // we have to prefix with use and suffix with query
+// Export the 'useGetProductsQuery' hook for accessing the 'getProducts' endpoint
+export const {useGetProductsQuery,
+     useGetProductDetailsQuery, 
+    useCreateProductMutation,
+    useUpdateProductMutation,
+    useUploadProductImageMutation,
+    useDeleteProductMutation,
+    useCreateReviewMutation,
+    useGetTopProductsQuery,
+} = productApiSlice;
+

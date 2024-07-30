@@ -1,35 +1,38 @@
-import jwt from 'jsonwebtoken'
-import asyncHandler from './asyncHandler.js';
-import User from '../models/userModel.js';
+import  jwt  from "jsonwebtoken";
+import asyncHandler from "./asyncHandler.js";
+import User from "../models/userModel.js";
 
-
-const protect = asyncHandler (async (req,res,next) => {// next is like ok we have done with this middle ware lets moveon to next one
+//Protect routes
+const protect = asyncHandler(async(req,res,next)=>{
     let token;
+    //Read the jwt from the cookie
+    token = req.cookies.jwt;
+    if(token){
+       try {
 
-    token = req.cookies.jwt;//jwt because we named jwt inside the cookies in user controller
-    if (token) {
-        try {
-            const decode = jwt.verify(token,process.env.JWT_SECRET);// this is to decode the jwt token
-           req.user = await User.findById(decode.userId).select('-password');
-           next();
-        } catch (error) {
-            console.log(error);
-            res.status(401);
-            throw new Error('Not authorized , token fail')
-        }
-    }else {
-       res.status(401);
-       throw new Error('Not authorized, no token') 
+        const decoded = jwt.verify(token,process.env.JWT_SECRET);
+        //If the token is successfully verified, it extracts the user ID (decoded.userId) from the token and fetches the corresponding user data from the database using User.findById(). The fetched user data is then attached to the request object (req.user) excluding the password for security reasons.
+        req.user = await User.findById(decoded.userId).select('-password');
+        next();
+       } catch (error) {
+        console.log(error)
+        res.status(401);
+        throw new Error('Not authorized, token failed');
+       }
+    }else{
+        res.status(401);
+        throw new Error('Not authorized, no token');
     }
-})
+})       
 
-const admin = (req,res,next) => {
-    if(req.user &&  req.user.isadmin) {
+
+//admin middleware
+const admin = (req, res, next) => {
+    if(req.user && req.user.isAdmin){
         next();
     }else{
         res.status(401);
-        throw new Error('Not authorised as admin')
-
-    }
+        throw new Error('Not authorized as admin');    }
 }
-export {protect,admin} ;
+
+export {protect, admin};

@@ -1,18 +1,21 @@
-import {Spinner} from "react-bootstrap"
-import { FaRegGrimace } from "react-icons/fa"
+import React from 'react'
+import { Spinner } from 'react-bootstrap'
 
 const Loader = () => {
-    return (
-       <Spinner
-        animation = 'border'
-        role = 'Status'
-        style={{
-            width: '100px',
-            height: '100px',
-            margin:'auto',
-            display:'block',
-        }}>
-       </Spinner>
-    )
+  return (
+    <div>
+      <Spinner 
+      animation="border"
+      role="status"
+      style={{
+        width:"100px",
+        height:"100px",
+        margin:"auto",
+        display:"block",
+      }}
+      ></Spinner>
+    </div>
+  )
 }
-export default Loader;
+
+export default Loader

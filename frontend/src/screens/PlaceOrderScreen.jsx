@@ -57,7 +57,6 @@ const PlaceOrderScreen = () => {
                 {cart.shippingAddress.postalCode},{' '}
                 {cart.shippingAddress.country}
               </p>
-              
             </ListGroup.Item>
 
             <ListGroup.Item>
